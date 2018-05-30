@@ -9,6 +9,7 @@ module ActiveRecordQueryTrace
     attr_accessor :lines
     attr_accessor :ignore_cached_queries
     attr_accessor :colorize
+    attr_accessor :backtrace_cleaner
 
     def logger
       ActiveRecordQueryTrace::ActiveRecord::LogSubscriber.logger
@@ -29,6 +30,7 @@ module ActiveRecordQueryTrace
         ActiveRecordQueryTrace.lines = 5
         ActiveRecordQueryTrace.ignore_cached_queries = false
         ActiveRecordQueryTrace.colorize = false
+        ActiveRecordQueryTrace.backtrace_cleaner = ActiveSupport::BacktraceCleaner.new if defined? ActiveSupport::BacktraceCleaner
 
         if ActiveRecordQueryTrace.level != :app
           # Rails by default silences all backtraces that match Rails::BacktraceCleaner::APP_DIRS_PATTERN
@@ -79,6 +81,8 @@ module ActiveRecordQueryTrace
 
       def clean_trace(trace)
         return trace if ActiveRecordQueryTrace.level==:full
+        return ActiveRecordQueryTrace.backtrace_cleaner.clean(trace) if ActiveRecordQueryTrace.level==:cleaner
+
         # Rails relies on backtrace cleaner to set the application root directory filter
         # the problem is that the backtrace cleaner is initialized before the application
         # this ensures that the value of `root` used by the filter is set to the application root

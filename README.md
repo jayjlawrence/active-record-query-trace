@@ -22,14 +22,16 @@ ActiveRecordQueryTrace.enabled = true
 
 ## Options
 
-There are three levels of debug.
+There are four levels/types of debug.
 
 1. app - includes only files in your app/, lib/, and engines/ directories.
 2. rails - includes files in your app as well as rails.
 3. full - alternate output of full backtrace, useful for debugging gems.
+4. cleaner - using a backtrace cleaner either created or supplied
 
 ```ruby
 ActiveRecordQueryTrace.level = :app # default
+ActiveRecordQueryTrace.backtrace_cleaner = #<ActiveSupport::BacktraceCleaner:.....>
 ```
 
 By default, a backtrace will be logged for every query, even cached queries that do not actually hit the database. You might find it useful not to print the backtrace for cached queries:
