@@ -11,4 +11,5 @@ Gem::Specification.new do |gem|
   gem.homepage      = 'https://github.com/ruckus/active-record-query-trace'
   gem.files         = Dir['lib/**/*']
   gem.license       = 'MIT'
+  gem.add_dependency "activerecord", '>=3.0.0', '< 5.0.0'
 end

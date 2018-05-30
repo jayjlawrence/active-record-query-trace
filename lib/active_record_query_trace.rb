@@ -32,7 +32,7 @@ module ActiveRecordQueryTrace
 
         if ActiveRecordQueryTrace.level != :app
           # Rails by default silences all backtraces that match Rails::BacktraceCleaner::APP_DIRS_PATTERN
-          Rails.backtrace_cleaner.remove_silencers!
+          Rails.backtrace_cleaner.remove_silencers! if defined? Rails
         end
       end
 
@@ -77,6 +77,7 @@ module ActiveRecordQueryTrace
       end
 
       def clean_trace(trace)
+        return trace if ActiveRecordQueryTrace.level==:full
         # Rails relies on backtrace cleaner to set the application root directory filter
         # the problem is that the backtrace cleaner is initialized before the application
         # this ensures that the value of `root` used by the filter is set to the application root
@@ -85,8 +86,6 @@ module ActiveRecordQueryTrace
         end
 
         case ActiveRecordQueryTrace.level
-        when :full
-          trace
         when :rails
           Rails.respond_to?(:backtrace_cleaner) ? Rails.backtrace_cleaner.clean(trace) : trace
         when :app
