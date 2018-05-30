@@ -50,8 +50,8 @@ module ActiveRecordQueryTrace
           return if payload[:name] == 'SCHEMA'
           return if ActiveRecordQueryTrace.ignore_cached_queries && payload[:name] == 'CACHE'
 
-          cleaned_trace = clean_trace(caller)[index].join("\n     from ")
-          debug("  Query Trace > " + colorize_text(cleaned_trace)) unless cleaned_trace.blank?
+          cleaned_trace = clean_trace(caller)[index].join("\n            > ")
+          debug("  SQL-TRACE > " + colorize_text(cleaned_trace)) unless cleaned_trace.blank?
         end
       end
 
