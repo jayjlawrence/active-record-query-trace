@@ -55,6 +55,7 @@ module ActiveRecordQueryTrace
         end
       end
 
+      private
       # Allow query to be colorized in the terminal
       def colorize_text(text)
         return text unless ActiveRecordQueryTrace.colorize
