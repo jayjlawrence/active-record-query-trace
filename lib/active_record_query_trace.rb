@@ -6,10 +6,12 @@ module ActiveRecordQueryTrace
   class << self
     attr_accessor :enabled
     attr_accessor :level
+    attr_accessor :scope
     attr_accessor :lines
     attr_accessor :ignore_cached_queries
     attr_accessor :colorize
     attr_accessor :backtrace_cleaner
+    attr_accessor :backtrace_prefix
 
     def logger
       ActiveRecordQueryTrace::ActiveRecord::LogSubscriber.logger
@@ -26,13 +28,15 @@ module ActiveRecordQueryTrace
       def initialize
         super
         ActiveRecordQueryTrace.enabled = false
-        ActiveRecordQueryTrace.level = :app
+        ActiveRecordQueryTrace.level = :debug
+        ActiveRecordQueryTrace.scope = :app
         ActiveRecordQueryTrace.lines = 5
         ActiveRecordQueryTrace.ignore_cached_queries = false
         ActiveRecordQueryTrace.colorize = false
         ActiveRecordQueryTrace.backtrace_cleaner = ActiveSupport::BacktraceCleaner.new if defined? ActiveSupport::BacktraceCleaner
+        ActiveRecordQueryTrace.backtrace_prefix = " QueryTrace > "
 
-        if ActiveRecordQueryTrace.level != :app
+        if ActiveRecordQueryTrace.scope != :app
           # Rails by default silences all backtraces that match Rails::BacktraceCleaner::APP_DIRS_PATTERN
           Rails.backtrace_cleaner.remove_silencers! if defined? Rails
         end
@@ -53,7 +57,7 @@ module ActiveRecordQueryTrace
           return if ActiveRecordQueryTrace.ignore_cached_queries && payload[:name] == 'CACHE'
 
           cleaned_trace = clean_trace(caller)[index].join("\n            > ")
-          debug("  SQL-TRACE > " + colorize_text(cleaned_trace)) unless cleaned_trace.blank?
+          send(ActiveRecordQueryTrace.level, ActiveRecordQueryTrace.backtrace_prefix + colorize_text(cleaned_trace)) unless cleaned_trace.blank?
         end
       end
 
@@ -80,8 +84,8 @@ module ActiveRecordQueryTrace
       end
 
       def clean_trace(trace)
-        return trace if ActiveRecordQueryTrace.level==:full
-        return ActiveRecordQueryTrace.backtrace_cleaner.clean(trace) if ActiveRecordQueryTrace.level==:cleaner
+        return trace if ActiveRecordQueryTrace.scope==:full
+        return ActiveRecordQueryTrace.backtrace_cleaner.clean(trace) if ActiveRecordQueryTrace.scope==:cleaner
 
         # Rails relies on backtrace cleaner to set the application root directory filter
         # the problem is that the backtrace cleaner is initialized before the application
@@ -90,7 +94,7 @@ module ActiveRecordQueryTrace
           Rails.backtrace_cleaner.instance_variable_set :@root, Rails.root.to_s
         end
 
-        case ActiveRecordQueryTrace.level
+        case ActiveRecordQueryTrace.scope
         when :rails
           Rails.respond_to?(:backtrace_cleaner) ? Rails.backtrace_cleaner.clean(trace) : trace
         when :app
@@ -98,7 +102,7 @@ module ActiveRecordQueryTrace
           Rails.backtrace_cleaner.add_silencer { |line| not line =~ /^(app|lib|engines)\// }
           Rails.backtrace_cleaner.clean(trace)
         else
-          raise "Invalid ActiveRecordQueryTrace.level value '#{ActiveRecordQueryTrace.level}' - should be :full, :rails, or :app"
+          raise "Invalid ActiveRecordQueryTrace.scope value '#{ActiveRecordQueryTrace.scope}' - should be :full, :cleaner, :rails, or :app"
         end
       end
 
