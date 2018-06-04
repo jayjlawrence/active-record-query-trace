@@ -34,7 +34,7 @@ module ActiveRecordQueryTrace
         ActiveRecordQueryTrace.ignore_cached_queries = false
         ActiveRecordQueryTrace.colorize = false
         ActiveRecordQueryTrace.backtrace_cleaner = ActiveSupport::BacktraceCleaner.new if defined? ActiveSupport::BacktraceCleaner
-        ActiveRecordQueryTrace.backtrace_prefix = " QueryTrace > "
+        ActiveRecordQueryTrace.backtrace_prefix = "SQLtrace > "
 
         if ActiveRecordQueryTrace.scope != :app
           # Rails by default silences all backtraces that match Rails::BacktraceCleaner::APP_DIRS_PATTERN
