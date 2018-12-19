@@ -21,12 +21,14 @@ GEM
     arel (3.0.3)
     builder (3.0.4)
     concurrent-ruby (1.0.5)
+    concurrent-ruby (1.0.5-java)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     multi_json (1.13.1)
     tzinfo (0.3.54)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
